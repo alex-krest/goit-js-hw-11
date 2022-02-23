@@ -18,7 +18,7 @@ return fetch(URL)
 	//   console.log(response);
 	//   console.log(response.blob());
 	//   console.log(response.json());
-	  return response.json();
+	//   return response.json();
 	}
  );
 }

@@ -26,16 +26,18 @@ console.log(refs.buttonMoreEl);
 const URL='https=//pixabay.com/api'
 const API_KEY='25825735-8b8da9ef48536d11ea73b8299';
 // ,-к-во элементов на странице:
-let page=1;
+// let page=1;
 // -к-во страниц в запросе:
-let per_page=40;
+// let per_page=40;
 const fetchPhoto=(nameReguest)=>{
 	// обьект параметров для запроса по странице и к-ву элементов:
-	const params=new URLSearchParams({
-		per_page:per_page,
-		page:page,
-	})
-return fetch(`${URL}/?key=${API_KEY}/&g=${nameReguest}&image_type=photo&orientation=horizontal&safesearch=true&${params}`)
+	// const params=new URLSearchParams({
+	// 	page:page,
+	// 	per_page:per_page,
+	// })
+return fetch
+// ('https:/pixabay.com/api/?key=25825735-8b8da9ef48536d11ea73b8299&image_type=photo&orientation=horizontal&safesearch=true')
+(`${URL}/?key=${API_KEY}&g=${nameReguest}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=1`)
 .then(
 	(response) => {
 	  if (!response.ok) {
@@ -46,36 +48,11 @@ return fetch(`${URL}/?key=${API_KEY}/&g=${nameReguest}&image_type=photo&orientat
 	}
  );
 }
-// --ФУНКЦИЯ ОБРАБОТКИ ЗАПРОСА(колбек для INPUT):
-const onSearchPhoto=(e)=>{
-	e.preventDefault();
-	const{
-		elements:{searchQuery}}=e.currentTarget;
-		const nameReguest=searchQuery.value;
-	console.log(nameReguest);
-fetchPhoto(nameReguest)
-.then(onThen)
-.catch(onCatch)
-}
-// -ФУНКЦИЯ ДЛЯ THENa:
-const onThen=(arrayPhoto)=>{
-	page+=1;
-	// -если массив пустой:
-	if(arrayPhoto===[]){
-return Notiflix.Notify.info("Sorry, there are no images matching your search query. Please try again.");
-}
-// -рендерим разметку :
-renderOfCard(arrayPhoto);
-}
 
-// -ФУНКЦИЯ ДЛЯ CATCHa:
-const onCatch=(error)=>{
-	Notiflix.Notify.warning(error);
-}
 // -ФУНКЦИЯ СОЗДАНИЯ РАЗМЕТКИ:
 const renderOfCard=(arrayPhoto)=>{
 const markup=arrayPhoto.map(({webformatURL,largeImageURL,tags,likes,views,comments,downloads })=>{
-	markup=` <div class="photo-card">
+	return ` <div class="photo-card">
 	<img src="${webformatURL}" alt="${tags}" loading="lazy" />
 	<div class="info">
 	  <p class="info-item">
@@ -92,8 +69,37 @@ const markup=arrayPhoto.map(({webformatURL,largeImageURL,tags,likes,views,commen
 	  </p>
 	</div>
  </div> `
-})
+}).join('');
+console.log(markup);
 refs.containerOfCards.innerHTML=markup;
 }
+// -ФУНКЦИЯ ДЛЯ THENa:
+const onThen=(arrayPhoto)=>{
+	page+=1;
+	// -если массив пустой:
+	if(arrayPhoto===[]){
+return Notiflix.Notify.info("Sorry, there are no images matching your search query. Please try again.");
+}
+// -рендерим разметку :
+ return renderOfCard(arrayPhoto);
+}
+
+// -ФУНКЦИЯ ДЛЯ CATCHa:
+const onCatch=(error)=>{
+	Notiflix.Notify.warning(error);
+}
+
+// --ФУНКЦИЯ ОБРАБОТКИ ЗАПРОСА(колбек для INPUT):
+const onSearchPhoto=(e)=>{
+	e.preventDefault();
+	const{
+		elements:{searchQuery}}=e.currentTarget;
+		const nameReguest=searchQuery.value;
+	console.log(nameReguest);
+return fetchPhoto(nameReguest)
+.then(onThen)
+.catch(onCatch)
+}
+
 // -ФУНКЦИЯ SUBMIT:
 refs.formEl.addEventListener('submit', onSearchPhoto)

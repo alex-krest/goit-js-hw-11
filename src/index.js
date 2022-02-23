@@ -3,7 +3,7 @@ import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import './css/styles.css';
-import cardItem from './templates/card.html';
+import ApiService from './api-service'
 // --ПЕРЕМЕННЫЕ(ССЫЛКИ НА ЭЛЕМЕНТЫ):
 const DEBOUNCE_DELAY = 300;
 const refs={
@@ -12,42 +12,12 @@ const refs={
 	containerOfCards:document.querySelector('.gallery'),
   buttonMoreEl:document.querySelector('.load-more'),
 }
+// -СОЗДАЕМ ЭКЗЕМПЛЯР КЛАССА:
+const photoApiService=new ApiService();
 
-console.log(refs.formEl);
-console.log(refs.submitEl);
-console.log(refs.containerOfCards);
-console.log(refs.buttonMoreEl);
 
 // -КНОПКА НЕ ВИДИМАЯ:
 // refs.buttonMoreEl.style.visibility='hidden';
-
-// ---ФУНКЦИЯ ВЫПОЛНЕНИЯ ЗАПРОСА:
-// --переменные для функции:
-const URL='https=//pixabay.com/api'
-const API_KEY='25825735-8b8da9ef48536d11ea73b8299';
-// ,-к-во элементов на странице:
-// let page=1;
-// -к-во страниц в запросе:
-// let per_page=40;
-const fetchPhoto=(nameReguest)=>{
-	// обьект параметров для запроса по странице и к-ву элементов:
-	// const params=new URLSearchParams({
-	// 	page:page,
-	// 	per_page:per_page,
-	// })
-return fetch
-// ('https:/pixabay.com/api/?key=25825735-8b8da9ef48536d11ea73b8299&image_type=photo&orientation=horizontal&safesearch=true')
-(`${URL}/?key=${API_KEY}&g=${nameReguest}&image_type=photo&orientation=horizontal&safesearch=true&per_page=40&page=1`)
-.then(
-	(response) => {
-	  if (!response.ok) {
-		 throw new Error(response.status);
-	  }
-	  console.log(response.json());
-	  return response.json();
-	}
- );
-}
 
 // -ФУНКЦИЯ СОЗДАНИЯ РАЗМЕТКИ:
 const renderOfCard=(arrayPhoto)=>{
@@ -75,13 +45,15 @@ refs.containerOfCards.innerHTML=markup;
 }
 // -ФУНКЦИЯ ДЛЯ THENa:
 const onThen=(arrayPhoto)=>{
-	page+=1;
 	// -если массив пустой:
 	if(arrayPhoto===[]){
 return Notiflix.Notify.info("Sorry, there are no images matching your search query. Please try again.");
 }
+photoApiService.page+=1;
+ console.log(photoApiService.page);
 // -рендерим разметку :
  return renderOfCard(arrayPhoto);
+
 }
 
 // -ФУНКЦИЯ ДЛЯ CATCHa:
@@ -92,14 +64,23 @@ const onCatch=(error)=>{
 // --ФУНКЦИЯ ОБРАБОТКИ ЗАПРОСА(колбек для INPUT):
 const onSearchPhoto=(e)=>{
 	e.preventDefault();
-	const{
-		elements:{searchQuery}}=e.currentTarget;
-		const nameReguest=searchQuery.value;
-	console.log(nameReguest);
-return fetchPhoto(nameReguest)
+	photoApiService.query=e.currentTarget.elements.searchQuery.value;
+	console.log(photoApiService.fetchPhoto());
+	// ПРИХОДИТ НЕ МАССИВ!!!!!ПОЧЕМУ????????:
+ photoApiService.fetchPhoto()
 .then(onThen)
 .catch(onCatch)
 }
 
 // -ФУНКЦИЯ SUBMIT:
 refs.formEl.addEventListener('submit', onSearchPhoto)
+
+
+// --ФУНКЦИЯ ЗАГРУЗИТЬ БОЛЬШЕ:
+function onLoadMore(){
+	photoApiService.fetchPhoto()
+	.then(onThen)
+	.catch(onCatch)
+	}
+
+	refs.buttonMoreEl.addEventListener('click',onLoadMore);
